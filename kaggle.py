@@ -22,9 +22,18 @@ def GetNotebookURL():
 
 def DownloadFromURL(url):
     # download the notebook from one url
-    os.system("kaggle kernels pull "+url[1:])
+    print(url[1:])
+    r = os.system("kaggle kernels pull "+url[1:])
     time.sleep(1)
-    print("success download "+url)
+    if(r==0):
+        print("success download "+url)
+        db = pymysql.connect(**dbinfo)
+        cursor = db.cursor()
+        sql = "update notebook set isdownload=1 where scriptUrl='{}'".format(url[0]);
+        cursor.execute(sql)
+        db.commit()
+        cursor.close()
+        db.close()
     
 def main():
     save_dir = './notebooks/'

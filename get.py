@@ -18,15 +18,16 @@ requests.keep_alive = False
 
 def getdata(afterarg):
     h = random.randint(0, len(headers) - 1)
+    conn = pymysql.connect(**dbinfo)
+    cursor = conn.cursor()
     try:
-        data = requests.get('https://www.kaggle.com/kernels.json?sortBy=hotness&group=everyone&pageSize=20&after=' \
+        data = requests.get('https://www.kaggle.com/kernels.json?sortBy=hotness&group=everyone&pageSize=500&after=' \
                         +str(afterarg)+'&language=Python&kernelType=Notebook',
                         headers = headers[h],timeout = (5, 15),verify = False)
     #    print('https://www.kaggle.com/kernels.json?sortBy=hotness&group=everyone&pageSize=20&after=' \
     #                    +str(afterarg)+'&language=Python&kernelType=Notebook')
         jsondata = data.json()
-        conn = pymysql.connect(**dbinfo)
-        cursor = conn.cursor()
+        print(afterarg,len(jsondata))
         for js in jsondata:
             ID = js['id']
             bestPublicScore = js['bestPublicScore']
@@ -37,6 +38,10 @@ def getdata(afterarg):
             title = js['title']
             for i in title:
                 if ord(i) >=256:
+                    title = title.replace(i," ")
+                if i=='"':
+                    title = title.replace(i,' ')
+                if i=="'":
                     title = title.replace(i," ")
             totalComments = js['totalComments']
             totalForks = js['totalForks']
@@ -53,6 +58,7 @@ def getdata(afterarg):
             cursor.execute(searchsql)
             ret = cursor.fetchmany(1)
             if ret!=():
+                print("already have")
                 continue
             notebooksql = "INSERT INTO notebook(id, \
                bestPublicScore, medal, scriptUrl, title, \
@@ -67,6 +73,13 @@ def getdata(afterarg):
                 sourceId = dataset['sourceId']
                 notebook_id = ID
                 name = dataset['name']
+                for i in name:
+                    if ord(i) >=256:
+                        name = name.replace(i," ")
+                    if i=='"':
+                        name = name.replace(i,' ')
+                    if i=="'":
+                        name = name.replace(i," ")
                 dataSourceUrl = dataset['dataSourceUrl']
                 sourceType = dataset['sourceType']
                 datasetsql = "INSERT INTO datasources(notebook_id,sourceId,name,dataSourceUrl,sourceType) \
@@ -77,6 +90,13 @@ def getdata(afterarg):
                 notebook_id = ID
                 tagid = tag['id']
                 name = tag['name']
+                for i in name:
+                    if ord(i) >=256:
+                        name = name.replace(i," ")
+                    if i=='"':
+                        name = name.replace(i,' ')
+                    if i=="'":
+                        name = name.replace(i," ")
                 fullpath = tag['fullPath']
                 description = tag['description']
                 tagsql = "INSERT INTO tags(notebook_id,tagid,name,fullpath,description) \
@@ -85,11 +105,13 @@ def getdata(afterarg):
                 cursor.execute(tagsql)
             print(scriptUrl + " download")
             conn.commit()
-            time.sleep(random.randint(1,5))
+        #time.sleep(random.randint(1,5))
     except Exception as e:
         print(e)
     cursor.close()
     conn.close()
 
-for i in range(100):
+#for i in range(250000,260000):
+while True:
+    i = random.randint(0,500000)
     getdata(i)
