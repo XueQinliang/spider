@@ -105,13 +105,20 @@ def getdata(afterarg):
                 cursor.execute(tagsql)
             print(scriptUrl + " download")
             conn.commit()
-        #time.sleep(random.randint(1,5))
+        time.sleep(random.randint(2,5))
     except Exception as e:
         print(e)
     cursor.close()
     conn.close()
 
-#for i in range(250000,260000):
-while True:
-    i = random.randint(0,500000)
-    getdata(i)
+def main(a):
+    for i in range(a*1000+510000,(a+1)*1000+510000):
+        getdata(i)
+
+if __name__ == '__main__':
+#    import sys
+#    main(int(sys.argv[1]))
+#    for i in range(510500,600000,1000):
+    while True:
+        i = random.randint(900000,1000000)
+        getdata(i)

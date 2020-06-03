@@ -12,7 +12,7 @@ from config import dbinfo
 def GetNotebookURL():
     db = pymysql.connect(**dbinfo)
     cursor = db.cursor()
-    sql = "select scripturl from notebook"
+    sql = "select scripturl from notebook where medal<>'none' and isdownload=0"
     #sql = "select distinct scripturl from notebook_list where dataurl not like '/c/%' and dataname <> 'multiple data sources' and label='{}';".format(tag)
     cursor.execute(sql)
     r = cursor.fetchall()
@@ -22,29 +22,32 @@ def GetNotebookURL():
 
 def DownloadFromURL(url):
     # download the notebook from one url
-    print(url[1:])
+    #print(url[1:])
     r = os.system("kaggle kernels pull "+url[1:])
     time.sleep(1)
     if(r==0):
-        print("success download "+url)
+        print("success "+url)
         db = pymysql.connect(**dbinfo)
         cursor = db.cursor()
-        sql = "update notebook set isdownload=1 where scriptUrl='{}'".format(url[0]);
+        sql = "update notebook set isdownload=1 where scriptUrl='{}'".format(url);
         cursor.execute(sql)
         db.commit()
         cursor.close()
         db.close()
-    
+    else:
+        print("fail "+url)
+
 def main():
-    save_dir = './notebooks/'
+    save_dir = './notebook/'
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
     os.chdir(save_dir)
     urls = GetNotebookURL()
-    for url in urls:
+    for url in urls[80:]:
         URL = url[0]
         #all_result.append(executor.submit(DownloadFromURL,(URL,tag)))
         DownloadFromURL(URL)
+        time.sleep(random.randint(5,10))
         '''if signal == True:
             db = connect()
             cursor = db.cursor()
