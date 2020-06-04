@@ -36,6 +36,13 @@ def DownloadFromURL(url):
         db.close()
     else:
         print("fail "+url)
+        db = pymysql.connect(**dbinfo)
+        cursor = db.cursor()
+        sql = "update notebook set isdownload=-1 where scriptUrl='{}'".format(url);
+        cursor.execute(sql)
+        db.commit()
+        cursor.close()
+        db.close()
 
 def main():
     save_dir = './notebook/'
@@ -43,11 +50,11 @@ def main():
         os.mkdir(save_dir)
     os.chdir(save_dir)
     urls = GetNotebookURL()
-    for url in urls[80:]:
+    for url in urls:
         URL = url[0]
         #all_result.append(executor.submit(DownloadFromURL,(URL,tag)))
         DownloadFromURL(URL)
-        time.sleep(random.randint(5,10))
+        time.sleep(random.randint(2,5))
         '''if signal == True:
             db = connect()
             cursor = db.cursor()

@@ -6,6 +6,7 @@ This is a temporary script file.
 """
 
 import requests
+from proxies import getip
 from config import headers
 from config import dbinfo
 import pymysql
@@ -120,5 +121,5 @@ if __name__ == '__main__':
 #    main(int(sys.argv[1]))
 #    for i in range(510500,600000,1000):
     while True:
-        i = random.randint(900000,1000000)
+        i = random.randint(510000,1000000)
         getdata(i)
